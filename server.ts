@@ -11,12 +11,17 @@ interface Business {
 
 // Konfigurasi koneksi database
 const connection = mysql.createConnection({
-  host: 'your_host',
-  user: 'your_username',
-  password: 'your_password',
-  database: 'your_database',
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  // port: 3306,
+  insecureAuth : true,
+  database: 'interview',
 });
 
+// const query = 'INSERT INTO businesses (name, location, category) VALUES (?, ?, ?)';
+// const { name, location, category } = {name: "sdf", location: "sdf", category:"sdfd"}
+// console.log(connection.query(query, [name, location, category]))
 const app = express();
 app.use(bodyParser.json());
 
