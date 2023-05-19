@@ -1,7 +1,7 @@
-import { Router } from "express";
-import { BusinessController } from "./controller/businessController";
+import express from "express";
+import { BusinessController } from "./controller/BusinessController";
 
-const router = Router();
+const router = express.Router();
 const businessController = new BusinessController();
 
 router.post("/business", businessController.createBusiness);

@@ -1,13 +1,25 @@
 import express from "express";
 import router from "./routes";
+import { BusinessModel } from "./models/BusinessModel";
 
-const app = express();
+class App {
+  private _app;
 
-app.use(express.json());
-app.use("/api", router);
+  constructor() {
+    this._app = express();
+    new BusinessModel().initDatabaseConnection();
+  }
 
-const PORT = process.env.PORT || 3000;
+  public runApp() {
+    this._app.use(express.json());
+    this._app.use(router);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+    const PORT = process.env.PORT || 3000;
+
+    this._app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  }
+}
+
+new App().runApp();

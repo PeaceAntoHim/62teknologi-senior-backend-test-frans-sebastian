@@ -1,84 +1,170 @@
 import { Request, Response } from "express";
-import Business from "../model/business";
+import { BusinessModel } from "../models/BusinessModel";
+
+interface Business {
+  id: number;
+  name: string;
+  address: string;
+  category: string;
+  rating: number;
+}
+
+const businessModel = new BusinessModel();
 
 export class BusinessController {
-  public createBusiness = async (req: Request, res: Response) => {
-    try {
-      const { name, address } = req.body;
-      const business = await Business.create({ name, address });
+  public createBusiness = (req: Request, res: Response) => {
+    const { name, address, category, rating }: Business = req.body;
 
-      return res.status(201).json({ business });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Internal Server Error" });
-    }
+    const query =
+      "INSERT INTO businesses (name, address, category, rating) VALUES (?, ?, ?, ?)";
+    const values = [name, address, category, rating];
+
+    businessModel.dbConnection.query(query, values, (err) => {
+      if (err) {
+        console.error("Error creating business:", err);
+        res.status(500).json({ error: "Failed to create business" });
+        return;
+      }
+      res.status(201).json({ message: "Business created successfully" });
+    });
   };
 
-  public updateBusiness = async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const { name, address } = req.body;
-      const [updatedRowsCount, updatedRows] = await Business.update(
-        { name, address },
-        { where: { id }, returning: true }
-      );
+  public updateBusiness = (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { name, address, category, rating }: Business = req.body;
 
-      if (updatedRowsCount === 0) {
-        return res.status(404).json({ message: "Business not found" });
+    const query =
+      "UPDATE businesses SET name = ?, address = ?, category = ?, rating = ? WHERE id = ?";
+    const values = [name, address, category, rating, id];
+
+    businessModel.dbConnection.query(query, values, (err) => {
+      if (err) {
+        console.error("Error updating business:", err);
+        res.status(500).json({ error: "Failed to update business" });
+        return;
+      }
+      res.json({ message: "Business updated successfully" });
+    });
+  };
+
+  public deleteBusiness = (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const query = "DELETE FROM businesses WHERE id = ?";
+    const values = [id];
+
+    businessModel.dbConnection.query(query, values, (err) => {
+      if (err) {
+        console.error("Error deleting business:", err);
+        res.status(500).json({ error: "Failed to delete business" });
+        return;
+      }
+      res.json({ message: "Business deleted successfully" });
+    });
+  };
+
+  public searchBusiness = (req: Request, res: Response) => {
+    const {
+      term,
+      location,
+      latitude,
+      longitude,
+      radius,
+      categories,
+      locale,
+      limit,
+      offset,
+      sort_by,
+      price,
+      open_now,
+      open_at,
+      attributes,
+    } = req.query;
+
+    // Membangun query untuk pencarian bisnis
+    let query = "SELECT * FROM businesses WHERE 1 = 1";
+    let values: (string | number)[] = [];
+
+    const params = {
+      term: { condition: "term = ?", getValue: (value: string) => value },
+      location: {
+        condition: "location = ?",
+        getValue: (value: string) => value,
+      },
+      latitude: {
+        condition: "latitude = ?",
+        getValue: (value: string) => parseFloat(value),
+      },
+      longitude: {
+        condition: "longitude = ?",
+        getValue: (value: string) => parseFloat(value),
+      },
+      radius: {
+        condition: "radius = ?",
+        getValue: (value: string) => parseInt(value),
+      },
+      categories: {
+        condition: "",
+        getValue: (value: string) => value.split(","),
+      },
+      locale: { condition: "locale = ?", getValue: (value: string) => value },
+      limit: {
+        condition: "LIMIT ?",
+        getValue: (value: string) => parseInt(value),
+      },
+      offset: {
+        condition: "OFFSET ?",
+        getValue: (value: string) => parseInt(value),
+      },
+      sort_by: { condition: "", getValue: (value: string) => value },
+      price: {
+        condition: "",
+        getValue: (value: string) =>
+          value.split(",").map((p: string) => parseInt(p)),
+      },
+      open_now: {
+        condition: "open_now = true",
+        getValue: (value: string) => null,
+      },
+      open_at: {
+        condition: "open_at = ?",
+        getValue: (value: string) => parseInt(value),
+      },
+      attributes: {
+        condition: "",
+        getValue: (value: string) => value.split(","),
+      },
+    };
+
+    // Membangun kondisi query berdasarkan parameter yang diberikan
+    Object.entries(params).forEach(([param, { condition, getValue }]) => {
+      const paramValue = req.query[param];
+      if (paramValue) {
+        if (condition) {
+          query += ` AND ${condition}`;
+        }
+        const value = getValue(paramValue as string);
+        if (value) {
+          if (Array.isArray(value)) {
+            query += ` (${value.map(() => "?").join(", ")})`;
+            values.push(...value);
+          } else {
+            query += " ?";
+            values.push(value);
+          }
+        }
+      }
+    });
+
+    // Eksekusi query
+    businessModel.dbConnection.query(query, values, (err, results) => {
+      if (err) {
+        console.error("Error searching businesses:", err);
+        res.status(500).json({ error: "Failed to search businesses" });
+        return;
       }
 
-      return res.json({ business: updatedRows[0] });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Internal Server Error" });
-    }
-  };
-
-  public deleteBusiness = async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const deletedRowsCount = await Business.destroy({ where: { id } });
-
-      if (deletedRowsCount === 0) {
-        return res.status(404).json({ message: "Business not found" });
-      }
-
-      return res.sendStatus(204);
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Internal Server Error" });
-    }
-  };
-
-  public searchBusiness = async (req: Request, res: Response) => {
-    try {
-      // Dapatkan parameter dari query string
-      const {
-        term,
-        location,
-        latitude,
-        longitude,
-        radius,
-        categories,
-        locale,
-        limit,
-        offset,
-        sort_by,
-        price,
-        open_now,
-        open_at,
-        attributes,
-      } = req.query;
-
-      // Lakukan pencarian data sesuai parameter yang diberikan
-
-      // Contoh sederhana: Ambil semua data bisnis
-      const businesses = await Business.findAll();
-
-      return res.json({ businesses });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Internal Server Error" });
-    }
+      res.json({ businesses: results });
+    });
   };
 }
