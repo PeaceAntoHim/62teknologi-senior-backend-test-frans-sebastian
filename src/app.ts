@@ -1,25 +1,25 @@
-import express from "express";
-import router from "./routes";
-import { BusinessModel } from "./models/BusinessModel";
+import express from 'express'
+import router from './routes'
+import { BusinessModel } from './models/BusinessModel'
 
 class App {
-  private _app;
+  private _app
 
-  constructor() {
-    this._app = express();
-    new BusinessModel().initDatabaseConnection();
+  constructor () {
+    this._app = express()
+    new BusinessModel().initDatabaseConnection()
   }
 
-  public runApp() {
-    this._app.use(express.json());
-    this._app.use(router);
+  public runApp () {
+    this._app.use(express.json())
+    this._app.use(router)
 
-    const PORT = process.env.PORT || 3000;
+    const PORT = process.env.PORT || 3000
 
     this._app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
+      console.log(`Server is running on port ${PORT}`)
+    })
   }
 }
 
-new App().runApp();
+new App().runApp()
