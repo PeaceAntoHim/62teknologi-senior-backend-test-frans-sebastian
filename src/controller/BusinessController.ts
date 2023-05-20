@@ -68,7 +68,7 @@ export class BusinessController {
 				id,
 			]);
 
-			console.log(selectResult.values);
+			console.log(selectResult);
 
 			// if (selectResult.length === 0) {
 			// 	res.status(404).json({ error: "Business not found" });
