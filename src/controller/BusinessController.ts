@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { BusinessModel } from "../models/BusinessModel";
+import { Query } from "mysql";
 
 type TBusiness = {
 	id?: number;
@@ -29,11 +30,9 @@ export class BusinessController {
 		try {
 			const payload: TBusiness = req.body;
 
-			const query = `
-    INSERT INTO businesses 
-      (name, location, latitude, longitude, term, radius, categories, locale, price, open_now, open_at, attributes, sort_by)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
+			const query =
+				"INSERT INTO businesses (name, location, latitude, longitude, term, radius, categories, locale, price, open_now, open_at, attributes, sort_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
 			const values = [
 				payload.name,
 				payload.location,
@@ -41,12 +40,12 @@ export class BusinessController {
 				payload.longitude,
 				payload.term,
 				payload.radius,
-				payload.categories,
+				JSON.stringify(payload.categories),
 				payload.locale,
-				payload.price,
+				JSON.stringify(payload.price),
 				payload.open_now,
 				payload.open_at,
-				payload.attributes,
+				JSON.stringify(payload.attributes),
 				payload.sort_by,
 			];
 
@@ -62,16 +61,75 @@ export class BusinessController {
 	public updateBusiness = async (req: Request, res: Response) => {
 		try {
 			const { id } = req.params;
-			const { name, location, categories }: TBusiness = req.body;
+			const payload: TBusiness = req.body;
 
-			const query = `
-        UPDATE businesses 
-        SET name = ?, location = ?, categories = ?
-        WHERE id = ?
-      `;
-			const values = [name, location, categories, id];
+			const querySelect = "SELECT * FROM businesses WHERE id = ?";
+			const selectResult = this._businessModel.dbConnection.query(querySelect, [
+				id,
+			]);
 
-			this._businessModel.dbConnection.query(query, values);
+			console.log(selectResult.values);
+
+			// if (selectResult.length === 0) {
+			// 	res.status(404).json({ error: "Business not found" });
+			// 	return;
+			// }
+
+			// const currentData: TBusiness = selectResult;
+
+			// const updatedData: TBusiness = {
+			// 	name: payload.name || currentData.name,
+			// 	location: payload.location || currentData.location,
+			// 	latitude: payload.latitude || currentData.latitude,
+			// 	longitude: payload.longitude || currentData.longitude,
+			// 	term: payload.term || currentData.term,
+			// 	radius: payload.radius || currentData.radius,
+			// 	categories: payload.categories || currentData.categories,
+			// 	locale: payload.locale || currentData.locale,
+			// 	price: payload.price || currentData.price,
+			// 	open_now: payload.open_now || currentData.open_now,
+			// 	open_at: payload.open_at || currentData.open_at,
+			// 	attributes: payload.attributes || currentData.attributes,
+			// 	sort_by: payload.sort_by || currentData.sort_by,
+			// };
+
+			const queryUpdate = `
+			 UPDATE businesses 
+			 SET
+				name = ?,
+				location = ?,
+				latitude = ?,
+				longitude = ?,
+				term = ?,
+				radius = ?,
+				categories = ?,
+				locale = ?,
+				price = ?,
+				open_now = ?,
+				open_at = ?,
+				attributes = ?,
+				sort_by = ?
+			 WHERE id = ?
+		  `;
+
+			// const values = [
+			// 	updatedData.name,
+			// 	updatedData.location,
+			// 	updatedData.latitude,
+			// 	updatedData.longitude,
+			// 	updatedData.term,
+			// 	updatedData.radius,
+			// 	updatedData.categories,
+			// 	updatedData.locale,
+			// 	updatedData.price,
+			// 	updatedData.open_now,
+			// 	updatedData.open_at,
+			// 	updatedData.attributes,
+			// 	updatedData.sort_by,
+			// 	id,
+			// ];
+
+			// this._businessModel.dbConnection.query(queryUpdate, values);
 
 			res.json({ message: "Business updated successfully" });
 		} catch (error) {
