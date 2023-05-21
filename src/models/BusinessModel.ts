@@ -1,5 +1,5 @@
 import mysql, { Connection, ConnectionConfig } from "mysql";
-import { Config } from "../Config";
+import { Config } from "../config";
 
 export class BusinessModel {
 	private _mysql;
