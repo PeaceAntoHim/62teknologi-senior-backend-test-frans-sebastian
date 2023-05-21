@@ -228,10 +228,13 @@ export class BusinessController {
 					getValue: (value: string) => value,
 				},
 				locale: { condition: "locale = ", getValue: (value: string) => value },
-				sort_by: { condition: "ORDER BY ", getValue: (value: string) => value },
+				sort_by: {
+					condition: "sort_by = ",
+					getValue: (value: string) => value,
+				},
 				price: {
 					condition: "price = ",
-					getValue: (value: string) => parseInt(value),
+					getValue: (value: string) => value,
 				},
 				open_now: {
 					condition: "open_now = ",
@@ -242,7 +245,7 @@ export class BusinessController {
 					getValue: (value: string) => parseInt(value),
 				},
 				attributes: {
-					condition: "attribute = ",
+					condition: "attributes = ",
 					getValue: (value: string) => value.split(","),
 				},
 			};

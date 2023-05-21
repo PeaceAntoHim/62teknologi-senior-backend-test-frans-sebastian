@@ -166,7 +166,7 @@ CREATE TABLE businesses (
     "name": "John",
     "location": "New York",
     "latitude": "40.7128",
-    "longitude": -74.006,
+    "longitude": "-74.006",
     "term": "food",
     "radius": 10,
     "categories": "restaurant",
@@ -215,10 +215,10 @@ http://localhost:3000/business/search?latitude=40.7128
 http://localhost:3000/business/search?longitude=-74.006 
 http://localhost:3000/business/search?radius=10
 http://localhost:3000/business/search?categories=restaurant
-http://localhost:3000/business/search?locale=en, 
-http://localhost:3000/business/search?sort_by=rating,
-http://localhost:3000/business/search?price=$500, 
-http://localhost:3000/business/search?open_now=1, 
-http://localhost:3000/business/search?open_at=8, 
+http://localhost:3000/business/search?locale=en 
+http://localhost:3000/business/search?sort_by=rating
+http://localhost:3000/business/search?price=$500 
+http://localhost:3000/business/search?open_now=1 
+http://localhost:3000/business/search?open_at=8 
 http://localhost:3000/business/search?attributes=Good
 ```
