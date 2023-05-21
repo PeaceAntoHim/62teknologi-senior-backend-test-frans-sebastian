@@ -23,9 +23,9 @@
       <a href="#api">API</a>
          <ul>
             <li>
-               <a href="#method-get">Method Post</a>
-               <a href="#method-get">Method Update</a>
-               <a href="#method-get">Method Delete</a>
+               <a href="#method-post">Method Post</a>
+               <a href="#method-put">Method Put</a>
+               <a href="#method-delete">Method Delete</a>
                <a href="#method-get">Method Get</a>
             </li>
          </ul>
@@ -119,17 +119,16 @@ CREATE TABLE businesses (
 ## Api
 
 ### Method Post
-- This method will need parameter body 
+- This method need parameter body to create data
   ```
     host: localhost
     port: 3000
     pathname: /business
     example: http://localhost:3000/business
   ```
-- Example payload
+- Example payload to create data and all this key data will required
   ```
    {
-    "id": 11,
     "name": "John",
     "location": "New York",
     "latitude": "40.7128",
@@ -145,6 +144,48 @@ CREATE TABLE businesses (
     "sort_by": "rating"
   }
   ```
+### Method Put
 
+- This method need params id and need parameter body to updated the data
+  ```
+    host: localhost
+    port: 3000
+    pathname: /business/:id
+    example: http://localhost:3000/business/1
+  ```
 
+  - Example payload but in here all data will optional and we can custom the data want to update
+  ```
+   {
+    "name": "John",
+    "location": "New York",
+    "latitude": "40.7128",
+    "longitude": -74.006,
+    "term": "food",
+    "radius": 10,
+    "categories": "restaurant",
+    "locale": "en",
+    "price": "$500",
+    "open_now": 1,
+    "open_at": 8,
+    "attributes": "good",
+    "sort_by": "rating"
+  }
+  ```
+  ```
+  {
+      "name": "Johan Hartono", 
+      "location": "Jln pluit permai 100 no 90", 
+      "categories": "Cars"     
+  }
+  ```
 
+### Method Delete
+
+- This method just need params id 
+  ```
+    host: localhost
+    port: 3000
+    pathname: /business/:id
+    example: http://localhost:3000/business/1
+  ```
