@@ -154,7 +154,7 @@ CREATE TABLE businesses (
     example: http://localhost:3000/business/1
   ```
 
-  - Example payload but in here all data will optional and we can custom the data want to update
+- Example payload but in here all data will optional and we can custom the data want to update
   ```
    {
     "name": "John",
@@ -189,3 +189,30 @@ CREATE TABLE businesses (
     pathname: /business/:id
     example: http://localhost:3000/business/1
   ```
+
+### Method Get
+
+- This method optional to use params like term, location, latitude, longitude, radius, categories, locale, limit, offset, sort_by, price, open_now, open_at, attributes because if not use all those params when request method get into 
+this pathname /business/search will query all data in database
+  ```
+    host: localhost
+    port: 3000
+    pathname: /business/search
+    example: http://localhost:3000/business/search
+  ```
+- Example params will get data specific
+
+```
+http://localhost:3000/business/search?term=food
+http://localhost:3000/business/search?location=New York
+http://localhost:3000/business/search?latitude=40.7128 
+http://localhost:3000/business/search?longitude=-74.006 
+http://localhost:3000/business/search?radius=10
+http://localhost:3000/business/search?categories=restaurant
+http://localhost:3000/business/search?locale=en, 
+http://localhost:3000/business/search?sort_by=rating,
+http://localhost:3000/business/search?price=$500, 
+http://localhost:3000/business/search?open_now= 1, 
+http://localhost:3000/business/search?open_at= 8, 
+http://localhost:3000/business/search?attributes= Good
+```
