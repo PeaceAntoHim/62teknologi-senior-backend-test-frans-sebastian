@@ -34,7 +34,6 @@
             <li>
                <a href="#method-get">Method Get</a>
             </li>
-
          </ul>
     </li>
   </ol>
