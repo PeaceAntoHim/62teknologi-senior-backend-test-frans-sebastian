@@ -23,6 +23,9 @@
       <a href="#api">API</a>
          <ul>
             <li>
+               <a href="#method-get">Method Post</a>
+               <a href="#method-get">Method Update</a>
+               <a href="#method-get">Method Delete</a>
                <a href="#method-get">Method Get</a>
             </li>
          </ul>
@@ -38,8 +41,9 @@
 
 ### Prerequisites
 
-- Have nodeJs and npm/yarn be installed (for running in local machine)
+- Have nodeJs and npm/yarn be installed (for running in local machine) this link https://nodejs.org/en will get into it
 - Have Mysql be installed (for running in local machine) this link https://dev.mysql.com/downloads/file/?id=518834 will get into it.
+- Have postman to test the api this link https://www.postman.com/downloads/postman-agent/ will get into it
 
 
 - Clone the repo
@@ -91,12 +95,12 @@ CREATE TABLE businesses (
    $ npm run lint
    ```
 
-- Run this command to start development server
+- Run this command to start server with nodemon
   ```
    npm run dev
   ```
 
-- Run this command to start the application
+- Run this command to start server without nodemon
   ```
   npm run start
   ```
@@ -114,13 +118,32 @@ CREATE TABLE businesses (
 
 ## Api
 
-### Method Get
-
-
-  
-- First '/' for the login in this will go to login page. In here you need email and password to login, here credentials will be used:
+### Method Post
+- This method will need parameter body 
   ```
-  
+    host: localhost
+    port: 3000
+    pathname: /business
+    example: http://localhost:3000/business
+  ```
+- Example payload
+  ```
+   {
+    "id": 11,
+    "name": "John",
+    "location": "New York",
+    "latitude": "40.7128",
+    "longitude": -74.006,
+    "term": "food",
+    "radius": 10,
+    "categories": "restaurant",
+    "locale": "en",
+    "price": "$500",
+    "open_now": 1,
+    "open_at": 8,
+    "attributes": "good",
+    "sort_by": "rating"
+  }
   ```
 
 
