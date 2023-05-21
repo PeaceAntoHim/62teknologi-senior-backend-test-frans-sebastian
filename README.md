@@ -24,12 +24,17 @@
          <ul>
             <li>
                <a href="#method-post">Method Post</a>
-               <a href="#method-delete">Method Delete</a>
-               <a href="#method-get">Method Get</a>
             </li>
             <li>
                 <a href="#method-put">Method Put</a>
             </li>
+            <li>
+                <a href="#method-delete">Method Delete</a>
+            </li>
+            <li>
+               <a href="#method-get">Method Get</a>
+            </li>
+
          </ul>
     </li>
   </ol>
