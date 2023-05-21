@@ -62,76 +62,86 @@ export class BusinessController {
 		try {
 			const { id } = req.params;
 			const payload: TBusiness = req.body;
-
 			const querySelect = "SELECT * FROM businesses WHERE id = ?";
-			const selectResult = this._businessModel.dbConnection.query(querySelect, [
-				id,
-			]);
+			// This to query select from database
+			this._businessModel.dbConnection.query(
+				querySelect,
+				[id],
+				(err, results) => {
+					if (err) {
+						console.error("Error searching businesses:", err);
+						res.status(500).json({ error: "Failed to search businesses" });
+						return;
+					}
+					if (results.length === 0) {
+						res.status(404).json({ error: "Business not found" });
+						return;
+					}
 
-			console.log(selectResult);
+					const currentData = results[0];
+					console.log(results);
 
-			// if (selectResult.length === 0) {
-			// 	res.status(404).json({ error: "Business not found" });
-			// 	return;
-			// }
+					const updatedData: TBusiness = {
+						name: payload.name || currentData.name,
+						location: payload.location || currentData.location,
+						latitude: payload.latitude || currentData.latitude,
+						longitude: payload.longitude || currentData.longitude,
+						term: payload.term || currentData.term,
+						radius: payload.radius || currentData.radius,
+						categories:
+							JSON.stringify(payload.categories) || currentData.categories,
+						locale: payload.locale || currentData.locale,
+						price: JSON.stringify(payload.price) || currentData.price,
+						open_now: payload.open_now || currentData.open_now,
+						open_at: payload.open_at || currentData.open_at,
+						attributes:
+							JSON.stringify(payload.attributes) || currentData.attributes,
+						sort_by: payload.sort_by || currentData.sort_by,
+					};
 
-			// const currentData: TBusiness = selectResult;
+					const queryUpdate = `
+					 UPDATE businesses 
+					 SET
+						name = ?,
+						location = ?,
+						latitude = ?,
+						longitude = ?,
+						term = ?,
+						radius = ?,
+						categories = ?,
+						locale = ?,
+						price = ?,
+						open_now = ?,
+						open_at = ?,
+						attributes = ?,
+						sort_by = ?
+					 WHERE id = ?
+				  `;
 
-			// const updatedData: TBusiness = {
-			// 	name: payload.name || currentData.name,
-			// 	location: payload.location || currentData.location,
-			// 	latitude: payload.latitude || currentData.latitude,
-			// 	longitude: payload.longitude || currentData.longitude,
-			// 	term: payload.term || currentData.term,
-			// 	radius: payload.radius || currentData.radius,
-			// 	categories: payload.categories || currentData.categories,
-			// 	locale: payload.locale || currentData.locale,
-			// 	price: payload.price || currentData.price,
-			// 	open_now: payload.open_now || currentData.open_now,
-			// 	open_at: payload.open_at || currentData.open_at,
-			// 	attributes: payload.attributes || currentData.attributes,
-			// 	sort_by: payload.sort_by || currentData.sort_by,
-			// };
+					const values = [
+						updatedData.name,
+						updatedData.location,
+						updatedData.latitude,
+						updatedData.longitude,
+						updatedData.term,
+						updatedData.radius,
+						updatedData.categories,
+						updatedData.locale,
+						updatedData.price,
+						updatedData.open_now,
+						updatedData.open_at,
+						updatedData.attributes,
+						updatedData.sort_by,
+						id,
+					];
 
-			const queryUpdate = `
-			 UPDATE businesses 
-			 SET
-				name = ?,
-				location = ?,
-				latitude = ?,
-				longitude = ?,
-				term = ?,
-				radius = ?,
-				categories = ?,
-				locale = ?,
-				price = ?,
-				open_now = ?,
-				open_at = ?,
-				attributes = ?,
-				sort_by = ?
-			 WHERE id = ?
-		  `;
+					// This to updated data from payload
+					this._businessModel.dbConnection.query(queryUpdate, values);
 
-			// const values = [
-			// 	updatedData.name,
-			// 	updatedData.location,
-			// 	updatedData.latitude,
-			// 	updatedData.longitude,
-			// 	updatedData.term,
-			// 	updatedData.radius,
-			// 	updatedData.categories,
-			// 	updatedData.locale,
-			// 	updatedData.price,
-			// 	updatedData.open_now,
-			// 	updatedData.open_at,
-			// 	updatedData.attributes,
-			// 	updatedData.sort_by,
-			// 	id,
-			// ];
-
-			// this._businessModel.dbConnection.query(queryUpdate, values);
-
-			res.json({ message: "Business updated successfully" });
+					res.json({ message: "Business updated successfully" });
+					return;
+				}
+			);
 		} catch (error) {
 			console.error("Error updating business:", error);
 			res.status(500).json({ error: "Failed to update business" });
