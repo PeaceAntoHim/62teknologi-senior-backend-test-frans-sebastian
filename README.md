@@ -212,7 +212,7 @@ http://localhost:3000/business/search?categories=restaurant
 http://localhost:3000/business/search?locale=en, 
 http://localhost:3000/business/search?sort_by=rating,
 http://localhost:3000/business/search?price=$500, 
-http://localhost:3000/business/search?open_now= 1, 
-http://localhost:3000/business/search?open_at= 8, 
-http://localhost:3000/business/search?attributes= Good
+http://localhost:3000/business/search?open_now=1, 
+http://localhost:3000/business/search?open_at=8, 
+http://localhost:3000/business/search?attributes=Good
 ```
