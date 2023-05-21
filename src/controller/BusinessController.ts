@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { BusinessModel } from "../models/BusinessModel";
-import { Query } from "mysql";
 
 type TBusiness = {
 	id?: number;
@@ -10,14 +9,24 @@ type TBusiness = {
 	longitude: number;
 	term: string;
 	radius: number;
-	categories: string[];
+	categories: string;
 	locale: string;
-	price: number[];
+	price: number;
 	open_now: boolean;
 	open_at: number;
-	attributes: string[];
-	sort_by: string[];
+	attributes: string;
+	sort_by: string;
 };
+
+// eslint-disable-next-line no-unused-vars
+enum STATUS {
+	// eslint-disable-next-line no-unused-vars
+	OK = "OK",
+	// eslint-disable-next-line no-unused-vars
+	NOT_OK = "NOT_OK",
+	// eslint-disable-next-line no-unused-vars
+	NOT_FOUND = "NOT_FOUND",
+}
 
 export class BusinessController {
 	private _businessModel: BusinessModel;
@@ -30,8 +39,9 @@ export class BusinessController {
 		try {
 			const payload: TBusiness = req.body;
 
-			const query =
-				"INSERT INTO businesses (name, location, latitude, longitude, term, radius, categories, locale, price, open_now, open_at, attributes, sort_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			const query = `INSERT INTO businesses 
+			(name, location, latitude, longitude, term, radius, categories, locale, price, open_now, open_at, 
+				attributes, sort_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
 			const values = [
 				payload.name,
@@ -40,21 +50,27 @@ export class BusinessController {
 				payload.longitude,
 				payload.term,
 				payload.radius,
-				JSON.stringify(payload.categories),
+				payload.categories,
 				payload.locale,
-				JSON.stringify(payload.price),
+				payload.price,
 				payload.open_now,
 				payload.open_at,
-				JSON.stringify(payload.attributes),
+				payload.attributes,
 				payload.sort_by,
 			];
 
 			this._businessModel.dbConnection.query(query, values);
 
-			res.status(201).json({ message: "Business created successfully" });
+			res.status(201).json({
+				status: STATUS.OK,
+				message: "Business created successfully",
+			});
+			return;
 		} catch (error) {
 			console.error("Error creating business:", error);
-			res.status(500).json({ error: "Failed to create business" });
+			res
+				.status(500)
+				.json({ status: STATUS.NOT_OK, error: "Failed to create business" });
 		}
 	};
 
@@ -70,11 +86,15 @@ export class BusinessController {
 				(err, results) => {
 					if (err) {
 						console.error("Error searching businesses:", err);
-						res.status(500).json({ error: "Failed to search businesses" });
+						res.status(500).json({
+							status: STATUS.NOT_OK,
+							error: "Failed to search businesses",
+						});
 						return;
-					}
-					if (results.length === 0) {
-						res.status(404).json({ error: "Business not found" });
+					} else if (results.length === 0) {
+						res
+							.status(404)
+							.json({ status: STATUS.NOT_FOUND, error: "Business not found" });
 						return;
 					}
 
@@ -88,14 +108,12 @@ export class BusinessController {
 						longitude: payload.longitude || currentData.longitude,
 						term: payload.term || currentData.term,
 						radius: payload.radius || currentData.radius,
-						categories:
-							JSON.stringify(payload.categories) || currentData.categories,
+						categories: payload.categories || currentData.categories,
 						locale: payload.locale || currentData.locale,
-						price: JSON.stringify(payload.price) || currentData.price,
+						price: payload.price || currentData.price,
 						open_now: payload.open_now || currentData.open_now,
 						open_at: payload.open_at || currentData.open_at,
-						attributes:
-							JSON.stringify(payload.attributes) || currentData.attributes,
+						attributes: payload.attributes || currentData.attributes,
 						sort_by: payload.sort_by || currentData.sort_by,
 					};
 
@@ -138,8 +156,10 @@ export class BusinessController {
 					// This to updated data from payload
 					this._businessModel.dbConnection.query(queryUpdate, values);
 
-					res.json({ message: "Business updated successfully" });
-					return;
+					res.status(200).json({
+						status: STATUS.OK,
+						message: "Business updated successfully",
+					});
 				}
 			);
 		} catch (error) {
@@ -149,123 +169,112 @@ export class BusinessController {
 	};
 
 	public deleteBusiness = (req: Request, res: Response) => {
-		const { id } = req.params;
+		try {
+			const { id } = req.params;
 
-		const query = "DELETE FROM businesses WHERE id = ?";
-		const values = [id];
+			const query = "DELETE FROM businesses WHERE id = ?";
+			const values = [id];
 
-		this._businessModel.dbConnection.query(query, values, (err) => {
-			if (err) {
-				console.error("Error deleting business:", err);
-				res.status(500).json({ error: "Failed to delete business" });
-				return;
-			}
-			res.json({ message: "Business deleted successfully" });
-		});
+			this._businessModel.dbConnection.query(query, values, (err, results) => {
+				if (err) {
+					console.error("Error deleting business:", err);
+					res.status(500).json({ error: "Failed to delete business" });
+					return;
+				} else if (results.affectedRows === 0) {
+					res
+						.status(404)
+						.json({ status: STATUS.NOT_FOUND, message: "Business not found" });
+					return;
+				}
+				res.status(200).json({
+					status: STATUS.OK,
+					message: "Business deleted successfully",
+				});
+			});
+		} catch (error) {
+			console.error("Error delete business:", error);
+			res
+				.status(500)
+				.json({ status: STATUS.NOT_OK, error: "Failed to delete business" });
+		}
 	};
 
 	public searchBusiness = (req: Request, res: Response) => {
-		const {
-			term,
-			location,
-			latitude,
-			longitude,
-			radius,
-			categories,
-			locale,
-			limit,
-			offset,
-			sort_by,
-			price,
-			open_now,
-			open_at,
-			attributes,
-		} = req.query;
+		try {
+			//Build query to search business
+			let query = "SELECT * FROM businesses WHERE 1 = 1";
+			const values: (string | number)[] = [];
 
-		// Membangun query untuk pencarian bisnis
-		let query = "SELECT * FROM businesses WHERE 1 = 1";
-		const values: (string | number)[] = [];
+			const params = {
+				term: { condition: "term = ", getValue: (value: string) => value },
+				location: {
+					condition: "location = ",
+					getValue: (value: string) => value,
+				},
+				latitude: {
+					condition: "latitude = ",
+					getValue: (value: string) => value,
+				},
+				longitude: {
+					condition: "longitude = ",
+					getValue: (value: string) => value,
+				},
+				radius: {
+					condition: "radius = ",
+					getValue: (value: string) => parseInt(value),
+				},
+				categories: {
+					condition: "categories = ",
+					getValue: (value: string) => value,
+				},
+				locale: { condition: "locale = ", getValue: (value: string) => value },
+				sort_by: { condition: "ORDER BY ", getValue: (value: string) => value },
+				price: {
+					condition: "price = ",
+					getValue: (value: string) => parseInt(value),
+				},
+				open_now: {
+					condition: "open_now = ",
+					getValue: (value: string) => value,
+				},
+				open_at: {
+					condition: "open_at = ",
+					getValue: (value: string) => parseInt(value),
+				},
+				attributes: {
+					condition: "attribute = ",
+					getValue: (value: string) => value.split(","),
+				},
+			};
 
-		const params = {
-			term: { condition: "term = ?", getValue: (value: string) => value },
-			location: {
-				condition: "location = ?",
-				getValue: (value: string) => value,
-			},
-			latitude: {
-				condition: "latitude = ?",
-				getValue: (value: string) => parseFloat(value),
-			},
-			longitude: {
-				condition: "longitude = ?",
-				getValue: (value: string) => parseFloat(value),
-			},
-			radius: {
-				condition: "radius = ?",
-				getValue: (value: string) => parseInt(value),
-			},
-			categories: {
-				condition: "",
-				getValue: (value: string) => value.split(","),
-			},
-			locale: { condition: "locale = ?", getValue: (value: string) => value },
-			limit: {
-				condition: "LIMIT ?",
-				getValue: (value: string) => parseInt(value),
-			},
-			offset: {
-				condition: "OFFSET ?",
-				getValue: (value: string) => parseInt(value),
-			},
-			sort_by: { condition: "", getValue: (value: string) => value },
-			price: {
-				condition: "",
-				getValue: (value: string) =>
-					value.split(",").map((p: string) => parseInt(p)),
-			},
-			open_now: {
-				condition: "open_now = true",
-				getValue: (value: string) => null,
-			},
-			open_at: {
-				condition: "open_at = ?",
-				getValue: (value: string) => parseInt(value),
-			},
-			attributes: {
-				condition: "",
-				getValue: (value: string) => value.split(","),
-			},
-		};
-
-		// Membangun kondisi query berdasarkan parameter yang diberikan
-		Object.entries(params).forEach(([param, { condition, getValue }]) => {
-			const paramValue = req.query[param];
-			if (paramValue) {
-				if (condition) {
-					query += ` AND ${condition}`;
-				}
-				const value = getValue(paramValue as string);
-				if (value) {
-					if (Array.isArray(value)) {
-						query += ` (${value.map(() => "?").join(", ")})`;
-						values.push(...value);
-					} else {
-						query += " ?";
-						values.push(value);
+			// Create condation query with parameter will get from params api get
+			Object.entries(params).forEach(([param, { condition, getValue }]) => {
+				const paramValue = req.query[param];
+				if (paramValue !== undefined && paramValue !== null) {
+					if (condition) {
+						query += ` AND ${condition}`;
+					}
+					const value = getValue(paramValue.toString());
+					if (value !== undefined && value !== null) {
+						query += ` ?`;
+						values.push(value as string);
 					}
 				}
-			}
-		});
+			});
 
-		// Eksekusi query
-		this._businessModel.dbConnection.query(query, values, (err, results) => {
-			if (err) {
-				console.error("Error searching businesses:", err);
-				res.status(500).json({ error: "Failed to search businesses" });
-				return;
-			}
+			// Execute query
+			this._businessModel.dbConnection.query(query, values, (err, results) => {
+				if (err) {
+					console.error("Error searching businesses:", err);
+					res.status(500).json({ error: "Failed to search businesses" });
+					return;
+				}
 
-			res.json({ businesses: results });
-		});
+				res.json({ businesses: results });
+			});
+		} catch (error) {
+			console.error("Error get business:", error);
+			res.status(500).json({ error: "Failed to get business" });
+		}
 	};
 }
