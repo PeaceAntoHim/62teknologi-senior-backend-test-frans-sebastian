@@ -138,7 +138,7 @@ CREATE TABLE businesses (
     "name": "John",
     "location": "New York",
     "latitude": "40.7128",
-    "longitude": -74.006,
+    "longitude": "-74.006",
     "term": "food",
     "radius": 10,
     "categories": "restaurant",
