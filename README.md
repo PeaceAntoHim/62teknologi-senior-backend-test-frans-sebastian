@@ -144,7 +144,7 @@ CREATE TABLE businesses (
     "categories": "restaurant",
     "locale": "en",
     "price": "$500",
-    "open_now": 1,
+    "open_now": true,
     "open_at": 8,
     "attributes": "good",
     "sort_by": "rating"
@@ -172,7 +172,7 @@ CREATE TABLE businesses (
     "categories": "restaurant",
     "locale": "en",
     "price": "$500",
-    "open_now": 1,
+    "open_now": true,
     "open_at": 8,
     "attributes": "good",
     "sort_by": "rating"
